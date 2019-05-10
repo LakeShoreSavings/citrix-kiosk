@@ -88,4 +88,7 @@ dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
 # set .ica files to always open automatically
 su - kiosk -c "xdg-mime default wfica.desktop application/x-ica"
 
+# squelch agreement dialog
+touch /home/kiosk/.ICAClient/.eula_accepted
+
 echo "Done!"
