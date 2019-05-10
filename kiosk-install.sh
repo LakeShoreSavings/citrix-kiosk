@@ -86,6 +86,6 @@ EOF
 dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
 
 # set .ica files to always open automatically
-xdg-mime default wfica.desktop application/x-ica
+su - kiosk -c "xdg-mime default wfica.desktop application/x-ica"
 
 echo "Done!"
