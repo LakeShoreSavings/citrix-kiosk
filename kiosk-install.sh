@@ -1,5 +1,10 @@
 #!/bin/bash
 
+
+wget http://wiki.lakeshoresavings.local/attachments/1 -O /tmp/icaclientWeb_19.3.0.5_amd64.deb
+dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
+
+
 # be new
 apt-get update
 
@@ -17,6 +22,8 @@ apt-get install \
 # dir
 mkdir -p /home/kiosk/.config/openbox
 mkdir -p /home/kiosk/.local/share/applications
+
+
 
 # create group
 groupadd kiosk
@@ -74,5 +81,8 @@ do
   sleep 5
 done &
 EOF
+
+# set .ica files to always open automatically
+xdg-mime default wfica.desktop application/x-ica
 
 echo "Done!"
