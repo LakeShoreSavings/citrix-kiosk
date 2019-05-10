@@ -2,7 +2,7 @@
 
 
 wget http://wiki.lakeshoresavings.local/attachments/1 -O /tmp/icaclientWeb_19.3.0.5_amd64.deb
-dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
+
 
 
 # be new
@@ -10,13 +10,13 @@ apt-get update
 
 # get software
 apt-get install \
-	unclutter \
+    unclutter \
     xorg \
     chromium \
     openbox \
     lightdm \
     locales \
-	pulseaudio \
+    pulseaudio \
     -y
 
 # dir
@@ -81,6 +81,9 @@ do
   sleep 5
 done &
 EOF
+
+# install Citric Workspace
+dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
 
 # set .ica files to always open automatically
 xdg-mime default wfica.desktop application/x-ica
