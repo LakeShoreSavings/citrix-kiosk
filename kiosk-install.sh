@@ -94,6 +94,10 @@ mkdir -p /etc/opt/chrome/policies/{managed, recommended}
 cat > /etc/opt/chrome/policies/managed/master_preferences.json << EOF
 {
   "homepage": "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/",
+  "DownloadDirectory": "/tmp/dl",
+  "ExtensionInstallForceList":[
+  
+  ],
   "default_apps_install_state":3,
    "download":{
       "directory_upgrade":true,
@@ -101,6 +105,8 @@ cat > /etc/opt/chrome/policies/managed/master_preferences.json << EOF
    },
 }
 EOF
+
+chmod -R 655 /etc/opt/chrome/policies/
 
 # install Citrix Workspace
 dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
