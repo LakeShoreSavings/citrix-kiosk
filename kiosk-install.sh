@@ -90,7 +90,8 @@ done &
 EOF
 
 #create master_preferences for chromium
-cat > /usr/bin/master_preferences << EOF
+mkdir -p /etc/opt/chrome/policies/{managed, recommended}
+cat > /etc/opt/chrome/policies/managed/master_preferences.json << EOF
 {
   "homepage": "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/",
   "default_apps_install_state":3,
