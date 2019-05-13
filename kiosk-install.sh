@@ -54,17 +54,24 @@ cat > /etc/lightdm/lightdm.conf << EOF
 autologin-user=kiosk
 EOF
 
+
+
+
 # create autostart
 if [ -e "/home/kiosk/.config/openbox/autostart" ]; then
   mv /home/kiosk/.config/openbox/autostart /home/kiosk/.config/openbox/autostart.backup
 fi
 cat > /home/kiosk/.config/openbox/autostart << EOF
+
 #!/bin/bash
 
-unclutter -idle 0.1 -grab -root &
+#unclutter -idle 0.1 -grab -root &
 
 while :
 do
+  rm -rf ~/Downloads/*
+  rm -rf ~/.{config, cache} 
+  
   chromium \
     --no-first-run \
     --start-maximized \
@@ -82,7 +89,19 @@ do
 done &
 EOF
 
-# install Citric Workspace
+#create master_preferences for chromium
+cat > /usr/bin/master_preferences << EOF
+{
+  "homepage": "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/",
+  "default_apps_install_state":3,
+   "download":{
+      "directory_upgrade":true,
+      "extensions_to_open":"ica"
+   },
+}
+EOF
+
+# install Citrix Workspace
 dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
 
 # set .ica files to always open automatically
