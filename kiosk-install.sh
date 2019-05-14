@@ -1,10 +1,5 @@
 #!/bin/bash
 
-
-wget http://wiki.lakeshoresavings.local/attachments/1 -O /tmp/icaclientWeb_19.3.0.5_amd64.deb
-
-
-
 # be new
 apt-get update
 
@@ -22,6 +17,8 @@ apt-get install \
 # dir
 mkdir -p /home/kiosk/.config/openbox
 mkdir -p /home/kiosk/.local/share/applications
+cp ./chromium.tar /home/kiosk/.config/
+chmod 655 /home/kiosk/.config/chromium.tar
 
 
 
@@ -70,7 +67,9 @@ cat > /home/kiosk/.config/openbox/autostart << EOF
 while :
 do
   rm -rf ~/Downloads/*
-  rm -rf ~/.{config, cache} 
+  rm -rf ~/.{config/chromium, cache} 
+  
+  tar -C ~/.config/chromium -xvf ~/.config/chromium.tar
   
   chromium \
     --no-first-run \
@@ -109,6 +108,7 @@ EOF
 chmod -R 655 /etc/opt/chrome/policies/
 
 # install Citrix Workspace
+wget http://wiki.lakeshoresavings.local/attachments/1 -O /tmp/icaclientWeb_19.3.0.5_amd64.deb
 dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
 
 # set .ica files to always open automatically
@@ -119,4 +119,11 @@ mkdir -p /home/kiosk/.ICAClient
 chown kiosk:kiosk /home/kiosk/.ICAClient
 touch /home/kiosk/.ICAClient/.eula_accepted
 
+# Hide GRUB
+sed -i s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0\\nGRUB_TIMEOUT_STYLE=HIDDEN\\nGRUB_HIDDEN_TIMEOUT=0\\nGRUB_HIDDEN_TIMEOUT_QUIET=TRUE/ /etc/default/grub
+update-grub
+
+
+
 echo "Done!"
+reboot
