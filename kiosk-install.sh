@@ -16,6 +16,8 @@ apt install --no-install-recommends \
     lightdm \
     locales \
     pulseaudio \
+    fail2ban \
+    git \
     -y
 
 # dir
@@ -67,9 +69,6 @@ cat > /home/kiosk/.config/openbox/autostart << EOF
 #!/bin/bash
 
 #unclutter -idle 0.1 -grab -root &
-##removed options
-##--window-size=1024,768 \
-##--incognito \
 
 while :
 do
@@ -97,26 +96,11 @@ EOF
 #create master_preferences for chromium
 mkdir -p $MANAGED $RECOMMENDED
 cp ./managed/*.json $MANAGED
-# cat > /etc/opt/chrome/policies/managed/master_preferences.json << EOF
-# {
-#   "homepage": "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/",
-#   "DownloadDirectory": "/tmp/dl",
-#   "ExtensionInstallForceList":[
-  
-#   ],
-#   "default_apps_install_state":3,
-#    "download":{
-#       "directory_upgrade":true,
-#       "extensions_to_open":"ica"
-#    },
-# }
-# EOF
+
 
 chmod -R 655 $MANAGED
 
 # install Citrix Workspace
-# wget http://wiki.lakeshoresavings.local/attachments/1 -O /tmp/icaclientWeb_19.3.0.5_amd64.deb
-# dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
 dpkg -i ./icaclientWeb_19.3.0.5_amd64.deb
 
 
@@ -128,7 +112,16 @@ mkdir -p /home/kiosk/.ICAClient
 chown kiosk:kiosk /home/kiosk/.ICAClient
 touch /home/kiosk/.ICAClient/.eula_accepted
 
-# Hide GRUB
+
+
+#Hardening install
+
+##set kiosk user shell
+# chsh -s /bin/false kiosk
+if [ ! -d ~/.ssh ]; then mkdir ~/.ssh; fi
+cat ./authorized_keys >> ~/.ssh/authorized_keys
+
+##Hide GRUB
 sed -i s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0\\nGRUB_TIMEOUT_STYLE=HIDDEN\\nGRUB_HIDDEN_TIMEOUT=0\\nGRUB_HIDDEN_TIMEOUT_QUIET=TRUE/ /etc/default/grub
 update-grub
 
