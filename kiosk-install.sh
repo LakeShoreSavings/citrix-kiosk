@@ -85,7 +85,7 @@ do
     --disable \
     --disable-translate \
     --disable-infobars \
-    --disable-suggestions-service \
+    --disable-suggestions-ui \
     --disable-save-password-bubble \
     --disable-session-crashed-bubble \
     --kiosk "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/"
@@ -94,7 +94,7 @@ done &
 EOF
 
 #create master_preferences for chromium
-mkdir -p {$MANAGED, $RECOMMENDED}
+mkdir -p $MANAGED $RECOMMENDED
 cp ./managed/*.json $MANAGED
 # cat > /etc/opt/chrome/policies/managed/master_preferences.json << EOF
 # {
