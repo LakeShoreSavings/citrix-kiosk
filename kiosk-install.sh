@@ -82,14 +82,12 @@ do
     --no-first-run \
     --start-maximized \
     --window-position=0,0 \
-    
     --disable \
     --disable-translate \
     --disable-infobars \
     --disable-suggestions-service \
     --disable-save-password-bubble \
     --disable-session-crashed-bubble \
-    
     --kiosk "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/"
   sleep 5
 done &
