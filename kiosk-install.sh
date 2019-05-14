@@ -76,7 +76,7 @@ do
   rm -rf ~/Downloads/*
   rm -rf ~/.{config/chromium, cache} 
   
-  tar -C ~/.config/chromium -xvf ~/.config/chromium.tar
+  tar -C ~/.config/ -xvf ~/.config/chromium.tar
   
   chromium \
     --no-first-run \
