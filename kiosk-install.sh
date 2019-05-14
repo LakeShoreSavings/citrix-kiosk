@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+
 # be new
 apt-get update
 
@@ -63,6 +65,9 @@ cat > /home/kiosk/.config/openbox/autostart << EOF
 #!/bin/bash
 
 #unclutter -idle 0.1 -grab -root &
+##removed options
+##--window-size=1024,768 \
+##--incognito \
 
 while :
 do
@@ -75,14 +80,14 @@ do
     --no-first-run \
     --start-maximized \
     --window-position=0,0 \
-    --window-size=1024,768 \
+    
     --disable \
     --disable-translate \
     --disable-infobars \
     --disable-suggestions-service \
     --disable-save-password-bubble \
     --disable-session-crashed-bubble \
-    --incognito \
+    
     --kiosk "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/"
   sleep 5
 done &
@@ -90,20 +95,21 @@ EOF
 
 #create master_preferences for chromium
 mkdir -p /etc/opt/chrome/policies/{managed, recommended}
-cat > /etc/opt/chrome/policies/managed/master_preferences.json << EOF
-{
-  "homepage": "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/",
-  "DownloadDirectory": "/tmp/dl",
-  "ExtensionInstallForceList":[
+cp ./managed/*.json /etc/opt/chrome/policies/managed
+# cat > /etc/opt/chrome/policies/managed/master_preferences.json << EOF
+# {
+#   "homepage": "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/",
+#   "DownloadDirectory": "/tmp/dl",
+#   "ExtensionInstallForceList":[
   
-  ],
-  "default_apps_install_state":3,
-   "download":{
-      "directory_upgrade":true,
-      "extensions_to_open":"ica"
-   },
-}
-EOF
+#   ],
+#   "default_apps_install_state":3,
+#    "download":{
+#       "directory_upgrade":true,
+#       "extensions_to_open":"ica"
+#    },
+# }
+# EOF
 
 chmod -R 655 /etc/opt/chrome/policies/
 
