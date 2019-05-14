@@ -1,12 +1,14 @@
 #!/bin/bash
-
+MANAGED=/etc/chromium/policies/managed
+RECOMMENDED=/etc/chromium/policies/recommended
 
 
 # be new
 apt-get update
 
 # get software
-apt-get install \
+# apt-get install \
+apt install --no-install-recommends \
     unclutter \
     xorg \
     chromium \
@@ -94,8 +96,8 @@ done &
 EOF
 
 #create master_preferences for chromium
-mkdir -p /etc/opt/chrome/policies/{managed, recommended}
-cp ./managed/*.json /etc/opt/chrome/policies/managed
+mkdir -p {$MANAGED, $RECOMMENDED}
+cp ./managed/*.json $MANAGED
 # cat > /etc/opt/chrome/policies/managed/master_preferences.json << EOF
 # {
 #   "homepage": "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/",
@@ -111,7 +113,7 @@ cp ./managed/*.json /etc/opt/chrome/policies/managed
 # }
 # EOF
 
-chmod -R 655 /etc/opt/chrome/policies/
+chmod -R 655 $MANAGED
 
 # install Citrix Workspace
 wget http://wiki.lakeshoresavings.local/attachments/1 -O /tmp/icaclientWeb_19.3.0.5_amd64.deb
