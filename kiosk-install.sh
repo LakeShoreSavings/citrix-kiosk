@@ -88,6 +88,7 @@ do
     --disable-suggestions-ui \
     --disable-save-password-bubble \
     --disable-session-crashed-bubble \
+    --incognito \
     --kiosk "http://lssb-ctxddc01.lakeshoresavings.local/Citrix/StoreWeb/"
   sleep 5
 done &
@@ -114,8 +115,10 @@ cp ./managed/*.json $MANAGED
 chmod -R 655 $MANAGED
 
 # install Citrix Workspace
-wget http://wiki.lakeshoresavings.local/attachments/1 -O /tmp/icaclientWeb_19.3.0.5_amd64.deb
-dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
+# wget http://wiki.lakeshoresavings.local/attachments/1 -O /tmp/icaclientWeb_19.3.0.5_amd64.deb
+# dpkg -i /tmp/icaclientWeb_19.3.0.5_amd64.deb
+dpkg -i ./icaclientWeb_19.3.0.5_amd64.deb
+
 
 # set .ica files to always open automatically
 su - kiosk -c "xdg-mime default wfica.desktop application/x-ica"
