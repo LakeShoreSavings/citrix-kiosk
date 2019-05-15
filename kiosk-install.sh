@@ -78,6 +78,8 @@ cat > /home/kiosk/.config/openbox/autostart << EOF
 
 while :
 do
+  xset s off
+  setterm -blank 0 -powersave off -powerdown 0
   rm -rf ~/Downloads/*
   rm -rf ~/.{config/chromium, cache} 
   
@@ -118,6 +120,9 @@ mkdir -p /home/kiosk/.ICAClient
 chown kiosk:kiosk /home/kiosk/.ICAClient
 touch /home/kiosk/.ICAClient/.eula_accepted
 
+
+#disable sleep & hibernation
+systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
 
 #Hardening install
