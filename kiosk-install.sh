@@ -63,6 +63,7 @@ cat > /etc/sudoers.d/kiosk << EOF
 kiosk ALL=NOPASSWD:/sbin/reboot
 EOF
 
+chmod 0440 /etc/sudoers.d/kiosk
 
 
 # create autostart
@@ -98,7 +99,7 @@ do
 done &
 EOF
 
-#create master_preferences for chromium
+#create policies for chromium
 mkdir -p $MANAGED $RECOMMENDED
 cp ./managed/*.json $MANAGED
 

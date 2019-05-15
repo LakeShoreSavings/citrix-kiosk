@@ -10,6 +10,7 @@
   <item label="Reboot">
     <action name='Execute'>
      <command>sudo /sbin/reboot</command>
+     </action>
   </item>
   <item label="Exit">
     <action name="Exit" />
