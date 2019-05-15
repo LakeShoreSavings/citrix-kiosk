@@ -18,6 +18,7 @@ apt install --no-install-recommends \
     pulseaudio \
     fail2ban \
     git \
+    sudo \
     -y
 
 # dir
@@ -57,6 +58,10 @@ cat > /etc/lightdm/lightdm.conf << EOF
 autologin-user=kiosk
 EOF
 
+# allow reboot
+cat > /etc/sudoers.d/kiosk << EOF
+kiosk ALL=NOPASSWD:/sbin/reboot
+EOF
 
 
 
@@ -117,9 +122,13 @@ touch /home/kiosk/.ICAClient/.eula_accepted
 #Hardening install
 
 ##set kiosk user shell
-# chsh -s /bin/false kiosk
+chsh -s /bin/false kiosk
+
 if [ ! -d ~/.ssh ]; then mkdir ~/.ssh; fi
 cat ./authorized_keys >> ~/.ssh/authorized_keys
+
+# Configure OpenBox CTXMenu
+cat ./menu.xml > /home/kiosk/.config/openbox/menu.xml
 
 ##Hide GRUB
 sed -i s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0\\nGRUB_TIMEOUT_STYLE=HIDDEN\\nGRUB_HIDDEN_TIMEOUT=0\\nGRUB_HIDDEN_TIMEOUT_QUIET=TRUE/ /etc/default/grub
