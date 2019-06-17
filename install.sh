@@ -19,6 +19,7 @@ read -n 1 -s -r -p "Press any key to continue"
 #Enable serial console in case hosted on KVM 
 HV=$(dmesg | grep "Hypervisor detected" | awk '{print $5}')
 if [ "$HV" == "KVM" ]; then
+echo ""
 echo "KVM Virtualization detected, adding serial port for virtual console."
 
 
@@ -50,7 +51,7 @@ echo ""
 echo "Cloning Git Repo..."
 git clone "https://github.com/bdelcamp/kiosk.git" "/opt/kiosk" > /dev/null 2>/var/log/ltsp.error.log
 
-if [ $? -ne 0]; then
+if [ $? -ne 0 ]; then
   read -n 1 -s -r -p "Error cloning repo. Press any key to cleanup exit"
   exit 1
 fi
