@@ -3,7 +3,6 @@
 CHROOT_DIR=/opt/ltsp/amd64
 MANAGED=/etc/chromium-browser/policies/managed
 RECOMMENDED=/etc/chromium/-browser/policies/recommended
-#$CHROME_USER_DATA_DIR
 
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 
@@ -44,7 +43,7 @@ fi
 
 #update hosts file
 sed -i "s/127.*/& ${HOSTNAME}/g" /etc/hosts
-echo "200.50.1.155 metrics.lakeshoresavings.local metrics" >> /etc/hosts
+echo "200.50.1.104 influxdb.lakeshoresavings.local influxdb" >> /etc/hosts
 
 #Pull our config files from the Git repo
 echo ""
@@ -240,7 +239,30 @@ EOF
 su - kiosk -c "xdg-mime default wfica.desktop application/x-ica"
 
 #accept Citrix EULA
-touch /home/kiosk/.ICAClient/.eula_accepted
+install -d -o 1001 -g 1001 /home/kiosk/.ICAClient
+install -p 1001 -g 1001 /home/kiosk/.ICAClient/.eula_accepted
+
+
+#do postflight checks before updating image
+ERROR=0
+if [ ! -f "$CHROOT_DIR/usr/bin/openbox" ]; then
+  echo "Openbox did not get installed..."
+  ((ERROR+=1))
+fi
+
+if [ ! -f "$CHROOT_DIR/usr/bin/chromium-browser"]; then
+  echo "Chromium did not get installed..."
+  ((ERROR+=1))
+fi
+
+if [ "$ERROR" -ne 0 ]; then
+  read -n 1 -s -r -p "Press any key to continue"
+else
+  echo "Validations complete. Total errors: $ERROR"
+fi
+
+
+
 
 #Finally, update customized netboot image
 echo ""
