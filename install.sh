@@ -12,7 +12,7 @@ fi
 
 if ! [ -x "$(command -v git)" ]; then
   echo "Git is not installed, installing... " 
-  apt-get install -qq -y git 2>&1 | tee -a "$ERRLOG"
+  apt install -qq -y git 2>> $ERRLOG
 fi
 
 echo "Setting chroot to ${CHROOT_DIR}"
@@ -119,10 +119,11 @@ cat /opt/kiosk/menu.xml > /home/kiosk/.config/openbox/menu.xml
 echo "" 
 echo -n "Bringing system packages up to date, this could take a while... "
 #be new
-apt-get -qq update 2>&1 | tee -a "$ERRLOG" && apt-get -qq -y upgrade 2>&1 | tee -a "$ERRLOG"
+apt update 2>&1 | tee -a "$ERRLOG"
+DEBIAN_FRONTEND=noninteractive apt upgrade -qq -y --force-yes >/dev/null 2>>"$ERRLOG"
 
 #install pre-requisite packages
-apt-get -qq -y install --no-install-recommends xdg-utils 2>&1 | tee -a "$ERRLOG"
+apt install -qq -y --no-install-recommends xdg-utils >/dev/null 2>>"$ERRLOG"
 
 echo -n "done."
 
@@ -130,9 +131,9 @@ echo ""
 echo "Installing LTSP Packages... "
 
 #install ltsp-server packages 
-add-apt-repository --yes ppa:ts.sch.gr > /dev/null 2>>/var/log/ltsp.error.log
-apt-get -qq update 2>&1 | tee -a "$ERRLOG"
-apt-get -qq -y install ltsp-server-standalone 2>&1 | tee -a "$ERRLOG"
+add-apt-repository --yes ppa:ts.sch.gr >/dev/null 2>>/var/log/ltsp.error.log
+apt update -qq >/dev/null 2>>$ERRLOG
+apt install -qq -y ltsp-server-standalone 2>>$ERRLOG
 
 
 if [ $? -ne 0 ]; then
@@ -207,7 +208,7 @@ rm /etc/localtime && ln -s /usr/share/zoneinfo/America/New_York /etc/localtime
 rm ${CHROOT_DIR}/etc/localtime; cp /usr/share/zoneinfo/America/New_York ${CHROOT_DIR}/etc/localtime
 
 echo "--Installing Window Manager & Chromium"
-ltsp-chroot -m --base /opt/ltsp --arch amd64 apt-get install -y openbox chromium-browser > /dev/null 2>$1
+ltsp-chroot -m --base /opt/ltsp --arch amd64 apt install -y -qq openbox chromium-browser > /dev/null 2>$1
 
 echo "--Adding entries to hosts file"
 cat > ${CHROOT_DIR}/etc/init.d/add-hosts <<EOF
@@ -237,8 +238,8 @@ echo ""
 echo -n "--Installing Citrix Workspace in chroot"
 
 cat << EOF | chroot "$CHROOT_DIR"
-apt-get -qq -y install /opt/kiosk/icaclient_19.3.0.5_amd64.deb 
-apt-get -qq -y install /opt/kiosk/ctxusb_2.7.5_amd64.deb
+dpkg -i /opt/kiosk/icaclient_19.3.0.5_amd64.deb && apt-get install -f -qq
+dpkg -i /opt/kiosk/ctxusb_2.7.5_amd64.deb && apt-get install -f -qq
 if [ "$?" -ne 0 ]; then
 echo "*** Error installing Citrix Workstation. Please install manually, then update chroot image ***"
 fi
@@ -250,7 +251,7 @@ su - kiosk -c "xdg-mime default wfica.desktop application/x-ica"
 
 #accept Citrix EULA
 install -d -o 1001 -g 1001 /home/kiosk/.ICAClient
-install -p 1001 -g 1001 /home/kiosk/.ICAClient/.eula_accepted
+touch /home/kiosk/.ICAClient/.eula_accepted
 
 
 #do postflight checks before updating image
@@ -291,7 +292,7 @@ echo "Installing telegraf..."
 curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
 source /etc/lsb-release
 echo "deb https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stable" | tee /etc/apt/sources.list.d/influxdb.list
-apt-get update && apt-get install -y telegraf
+apt update && apt -y -qq install telegraf
 sleep 5
 sed -i "97i urls = [\"http://influxdb:8086\"]\ndatabase = \"telegraf\" \n" /etc/telegraf/telegraf.conf
 
