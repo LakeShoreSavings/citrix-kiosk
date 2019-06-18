@@ -12,7 +12,7 @@ fi
 
 if ! [ -x "$(command -v git)" ]; then
   echo "Git is not installed, installing... " 
-  apt install -qq -y git 2>> $ERRLOG
+  apt install -qq -y git >/dev/null 2>> $ERRLOG
 fi
 
 echo "Setting chroot to ${CHROOT_DIR}"
@@ -119,11 +119,11 @@ cat /opt/kiosk/menu.xml > /home/kiosk/.config/openbox/menu.xml
 echo "" 
 echo -n "Bringing system packages up to date, this could take a while... "
 #be new
-apt update 2>&1 | tee -a "$ERRLOG"
-DEBIAN_FRONTEND=noninteractive apt upgrade -qq -y --force-yes >/dev/null 2>>"$ERRLOG"
+apt update >/dev/null 2>&1 | tee -a "$ERRLOG"
+DEBIAN_FRONTEND=noninteractive apt upgrade -y --force-yes >/dev/null 2>>"$ERRLOG"
 
 #install pre-requisite packages
-apt install -qq -y --no-install-recommends xdg-utils >/dev/null 2>>"$ERRLOG"
+apt install  -y --no-install-recommends xdg-utils >/dev/null 2>>"$ERRLOG"
 
 echo -n "done."
 
@@ -132,8 +132,8 @@ echo "Installing LTSP Packages... "
 
 #install ltsp-server packages 
 add-apt-repository --yes ppa:ts.sch.gr >/dev/null 2>>/var/log/ltsp.error.log
-apt update -qq >/dev/null 2>>$ERRLOG
-apt install -qq -y ltsp-server-standalone 2>>$ERRLOG
+apt update >/dev/null 2>>$ERRLOG
+apt install -y ltsp-server-standalone >/dev/null 2>>$ERRLOG
 
 
 if [ $? -ne 0 ]; then
@@ -179,7 +179,7 @@ build_chroot () {
     ltsp-build-client --purge-chroot \
     --mount-package-cache \
     --extra-mirror 'http://ppa.launchpad.net/ts.sch.gr/ppa/ubuntu bionic main' \
-    --apt-keys '/etc/apt/trusted.gpg.d/ts_sch_gr_ubuntu_ppa.gpg' > /dev/null 2>/var/log/chroot.error.log
+    --apt-keys '/etc/apt/trusted.gpg.d/ts_sch_gr_ubuntu_ppa.gpg' > /dev/null 2>>/var/log/chroot.error.log
     if [ $? -ne 0 ]; then
         echo -n "ERROR ${?}"
         echo ""
@@ -208,7 +208,7 @@ rm /etc/localtime && ln -s /usr/share/zoneinfo/America/New_York /etc/localtime
 rm ${CHROOT_DIR}/etc/localtime; cp /usr/share/zoneinfo/America/New_York ${CHROOT_DIR}/etc/localtime
 
 echo "--Installing Window Manager & Chromium"
-ltsp-chroot -m --base /opt/ltsp --arch amd64 apt install -y -qq openbox chromium-browser > /dev/null 2>$1
+ltsp-chroot -m --base /opt/ltsp --arch amd64 apt install -y openbox chromium-browser > /dev/null
 
 echo "--Adding entries to hosts file"
 cat > ${CHROOT_DIR}/etc/init.d/add-hosts <<EOF
@@ -281,7 +281,8 @@ fi
 #Finally, update customized netboot image
 echo ""
 echo -n "Finalizing boot image"
-ltsp-update-sshkeys && ltsp-update-image > /dev/null 2>/var/log/chroot.error.log
+ltsp-update-sshkeys
+ltsp-update-image > /dev/null 2>>/var/log/chroot.error.log
 ltsp-config dnsmasq
 
 
