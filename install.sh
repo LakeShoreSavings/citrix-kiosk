@@ -121,6 +121,8 @@ apt-get update  >>/dev/null 2>&1 && apt-get upgrade -y > /dev/null 2>ltsp.error.
 #install pre-requisite packages
 apt-get install -y --no-install-recommends xdg-utils > /dev/null 2>ltsp.error.log
 
+echo -n "done."
+
 echo ""
 echo "Installing LTSP Packages... "
 
@@ -252,12 +254,12 @@ ERROR=0
 
 echo ""
 echo "Performing preflight checks before updating image..."
-if [ ! -f "$CHROOT_DIR/usr/bin/openbox" ]; then
+if ! [ -f "$CHROOT_DIR/usr/bin/openbox" ]; then
   echo "Openbox did not get installed..."
   ((ERROR+=1))
 fi
 
-if [ ! -f "$CHROOT_DIR/usr/bin/chromium-browser"]; then
+if ! [ -f "$CHROOT_DIR/usr/bin/chromium-browser" ]; then
   echo "Chromium did not get installed..."
   ((ERROR+=1))
 fi
