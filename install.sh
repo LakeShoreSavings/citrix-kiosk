@@ -9,7 +9,10 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-command -v foo >/dev/null 2>&1 || { echo >&2 "Git not found, installing...."; apt install git -y > /dev/null 2>&1 ; }
+if ! [ -x "$(command -v git)" ]; then
+  echo "Git is not installed, installing... " >&2
+  apt-get install -y git >/dev/null 2>&1
+fi
 
 echo "Setting chroot to ${CHROOT_DIR}"
 
@@ -198,7 +201,7 @@ rm /etc/localtime && ln -s /usr/share/zoneinfo/America/New_York /etc/localtime
 rm ${CHROOT_DIR}/etc/localtime; cp /usr/share/zoneinfo/America/New_York ${CHROOT_DIR}/etc/localtime
 
 echo "--Installing Window Manager & Chromium"
-ltsp-chroot -m --base /opt/ltsp --arch amd64 apt install -y openbox chromium-browser > /dev/null 2>$1
+ltsp-chroot -m --base /opt/ltsp --arch amd64 apt-get install -y openbox chromium-browser > /dev/null 2>$1
 
 echo "--Adding entries to hosts file"
 cat > ${CHROOT_DIR}/etc/init.d/add-hosts <<EOF
@@ -228,7 +231,8 @@ echo ""
 echo -n "--Installing Citrix Workspace in chroot"
 
 cat << EOF | chroot "$CHROOT_DIR"
-dpkg -i /opt/kiosk/icaclientWeb_19.3.0.5_amd64.deb 
+apt-get install -y /opt/kiosk/icaclient_19.3.0.5_amd64.deb \ 
+&& apt-get install /opt/kiosk/ctxusb_2.7.5_amd64.deb
 if [ "$?" -ne 0 ]; then
 echo "*** Error installing Citrix Workstation. Please install manually, then update chroot image ***"
 fi
@@ -245,6 +249,9 @@ install -p 1001 -g 1001 /home/kiosk/.ICAClient/.eula_accepted
 
 #do postflight checks before updating image
 ERROR=0
+
+echo ""
+echo "Performing preflight checks before updating image..."
 if [ ! -f "$CHROOT_DIR/usr/bin/openbox" ]; then
   echo "Openbox did not get installed..."
   ((ERROR+=1))
