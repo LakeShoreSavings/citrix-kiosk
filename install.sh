@@ -3,6 +3,7 @@
 CHROOT_DIR=/opt/ltsp/amd64
 MANAGED=/etc/chromium-browser/policies/managed
 RECOMMENDED=/etc/chromium/-browser/policies/recommended
+ERRLOG=/var/log/ltsp.error.log
 
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 
@@ -10,8 +11,8 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 if ! [ -x "$(command -v git)" ]; then
-  echo "Git is not installed, installing... " >&2
-  apt-get install -y git >/dev/null 2>&1
+  echo "Git is not installed, installing... " 
+  apt-get install -qq -y git 2>&1 | tee -a "$ERRLOG"
 fi
 
 echo "Setting chroot to ${CHROOT_DIR}"
@@ -51,10 +52,12 @@ echo "200.50.1.104 influxdb.lakeshoresavings.local influxdb" >> /etc/hosts
 #Pull our config files from the Git repo
 echo ""
 echo "Cloning Git Repo..."
-git clone "https://github.com/bdelcamp/kiosk.git" "/opt/kiosk" > /dev/null 2>/var/log/ltsp.error.log
+git clone "https://github.com/bdelcamp/kiosk.git" "/opt/kiosk" > /dev/null 2>> "$ERRLOG"
 
 if [ $? -ne 0 ]; then
-  read -n 1 -s -r -p "Error cloning repo. Press any key to cleanup exit"
+  read -n 1 -s -r -p "Error cloning repo. Press any key to cleanup and exit"
+  userdel kiosk
+  rm -rf /opt/kiosk
   exit 1
 fi
 
@@ -116,10 +119,10 @@ cat /opt/kiosk/menu.xml > /home/kiosk/.config/openbox/menu.xml
 echo "" 
 echo -n "Bringing system packages up to date, this could take a while... "
 #be new
-apt-get update  >>/dev/null 2>&1 && apt-get upgrade -y > /dev/null 2>ltsp.error.log
+apt-get -qq update 2>&1 | tee -a "$ERRLOG" && apt-get -qq -y upgrade 2>&1 | tee -a "$ERRLOG"
 
 #install pre-requisite packages
-apt-get install -y --no-install-recommends xdg-utils > /dev/null 2>ltsp.error.log
+apt-get -qq -y install --no-install-recommends xdg-utils 2>&1 | tee -a "$ERRLOG"
 
 echo -n "done."
 
@@ -127,9 +130,9 @@ echo ""
 echo "Installing LTSP Packages... "
 
 #install ltsp-server packages 
-add-apt-repository --yes ppa:ts.sch.gr > /dev/null 2>/var/log/ltsp.error.log
-apt-get update > /dev/null 2>/var/log/ltsp.error.log
-apt-get install -y ltsp-server-standalone > /dev/null 2>/var/log/ltsp.error.log
+add-apt-repository --yes ppa:ts.sch.gr > /dev/null 2>>/var/log/ltsp.error.log
+apt-get -qq update 2>&1 | tee -a "$ERRLOG"
+apt-get -qq -y install ltsp-server-standalone 2>&1 | tee -a "$ERRLOG"
 
 
 if [ $? -ne 0 ]; then
@@ -137,6 +140,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo -n "done"
 
 ##Only for NFS Exported Homes
 ##echo “/home *(rw,sync,no_subtree_check)” >> /etc/exports
@@ -233,8 +237,8 @@ echo ""
 echo -n "--Installing Citrix Workspace in chroot"
 
 cat << EOF | chroot "$CHROOT_DIR"
-apt-get install -y /opt/kiosk/icaclient_19.3.0.5_amd64.deb \ 
-&& apt-get install /opt/kiosk/ctxusb_2.7.5_amd64.deb
+apt-get -qq -y install /opt/kiosk/icaclient_19.3.0.5_amd64.deb 
+apt-get -qq -y install /opt/kiosk/ctxusb_2.7.5_amd64.deb
 if [ "$?" -ne 0 ]; then
 echo "*** Error installing Citrix Workstation. Please install manually, then update chroot image ***"
 fi
