@@ -1,3 +1,2 @@
-Linux Citrix Kiosk
-  - Based on Debian 9 "Stretch" https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-9.9.0-amd64-netinst.iso
-  
+Linux Citrix Kiosk Server
+  - Based on [Ubuntu Server 18.04 LTS](http://releases.ubuntu.com/18.04.2/ubuntu-18.04.2-live-server-amd64.iso)
