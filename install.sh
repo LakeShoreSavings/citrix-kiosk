@@ -128,7 +128,7 @@ apt install  -y --no-install-recommends xdg-utils >/dev/null 2>>"$ERRLOG"
 echo -n "done."
 
 echo ""
-echo "Installing LTSP Packages... "
+echo -n "Installing LTSP Packages... "
 
 #install ltsp-server packages 
 add-apt-repository --yes ppa:ts.sch.gr >/dev/null 2>>/var/log/ltsp.error.log
@@ -149,7 +149,7 @@ echo -n "done"
 
 
 #Create ltsp client config 
-ltsp-config lts.conf
+ltsp-config lts.conf > /dev/null 2>&1
 
 cat > /var/lib/tftpboot/ltsp/amd64/lts.conf <<EOF
 [Default]
@@ -180,7 +180,7 @@ build_chroot () {
     --mount-package-cache \
     --extra-mirror 'http://ppa.launchpad.net/ts.sch.gr/ppa/ubuntu bionic main' \
     --apt-keys '/etc/apt/trusted.gpg.d/ts_sch_gr_ubuntu_ppa.gpg' > /dev/null 2>>/var/log/chroot.error.log
-    if [ $? -ne 0 ]; then
+    if [ "$?" -ne 0 ]; then
         echo -n "ERROR ${?}"
         echo ""
         echo "*** Error creating chroot ***"
@@ -238,8 +238,7 @@ echo ""
 echo -n "--Installing Citrix Workspace in chroot"
 
 cat << EOF | chroot "$CHROOT_DIR"
-dpkg -i /opt/kiosk/icaclient_19.3.0.5_amd64.deb && apt-get install -f -qq
-dpkg -i /opt/kiosk/ctxusb_2.7.5_amd64.deb && apt-get install -f -qq
+dpkg -i icaclientWeb_19.3.0.5_amd64.deb
 if [ "$?" -ne 0 ]; then
 echo "*** Error installing Citrix Workstation. Please install manually, then update chroot image ***"
 fi
