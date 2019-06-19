@@ -12,7 +12,7 @@ fi
 
 if ! [ -x "$(command -v git)" ]; then
   echo "Git is not installed, installing... " 
-  apt install -qq -y git >/dev/null 2>> $ERRLOG
+  apt-get install -qq git >/dev/null 2>> $ERRLOG
 fi
 
 echo "Setting chroot to ${CHROOT_DIR}"
@@ -52,7 +52,7 @@ echo "200.50.1.104 influxdb.lakeshoresavings.local influxdb" >> /etc/hosts
 #Pull our config files from the Git repo
 echo ""
 echo "Cloning Git Repo..."
-git clone "https://github.com/bdelcamp/kiosk.git" "/opt/kiosk" > /dev/null 2>> "$ERRLOG"
+git clone "https://github.com/bdelcamp/kiosk.git" "/opt/kiosk" >/dev/null 2>> "$ERRLOG"
 
 if [ $? -ne 0 ]; then
   read -n 1 -s -r -p "Error cloning repo. Press any key to cleanup and exit"
@@ -60,6 +60,9 @@ if [ $? -ne 0 ]; then
   rm -rf /opt/kiosk
   exit 1
 fi
+echo -n "done"
+
+
 
 #Create our kiosk user & set defaults
 echo "Create Kiosk user"
@@ -116,14 +119,16 @@ cat /opt/kiosk/menu.xml > /home/kiosk/.config/openbox/menu.xml
 
 # read -n 1 -s -r -p "Press any key to continue"
 
+
+# BE NEW
 echo "" 
 echo -n "Bringing system packages up to date, this could take a while... "
-#be new
+
 apt update >/dev/null 2>&1 | tee -a "$ERRLOG"
-DEBIAN_FRONTEND=noninteractive apt upgrade -y --force-yes >/dev/null 2>>"$ERRLOG"
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -qq >/dev/null 2>>"$ERRLOG"
 
 #install pre-requisite packages
-apt install  -y --no-install-recommends xdg-utils >/dev/null 2>>"$ERRLOG"
+apt-get install -qq --no-install-recommends xdg-utils >/dev/null 2>>"$ERRLOG"
 
 echo -n "done."
 
@@ -131,9 +136,9 @@ echo ""
 echo -n "Installing LTSP Packages... "
 
 #install ltsp-server packages 
-add-apt-repository --yes ppa:ts.sch.gr >/dev/null 2>>/var/log/ltsp.error.log
-apt update >/dev/null 2>>$ERRLOG
-apt install -y ltsp-server-standalone >/dev/null 2>>$ERRLOG
+add-apt-repository --yes ppa:ts.sch.gr >/dev/null 2>>$ERRLOG
+apt-get update -qq >/dev/null 2>>$ERRLOG
+apt-get install -qq ltsp-server-standalone >/dev/null 2>>$ERRLOG
 
 
 if [ $? -ne 0 ]; then
@@ -176,10 +181,13 @@ echo -n "Bundling initial chroot..."
 
 
 build_chroot () {
-    ltsp-build-client --purge-chroot \
-    --mount-package-cache \
-    --extra-mirror 'http://ppa.launchpad.net/ts.sch.gr/ppa/ubuntu bionic main' \
-    --apt-keys '/etc/apt/trusted.gpg.d/ts_sch_gr_ubuntu_ppa.gpg' > /dev/null 2>>/var/log/chroot.error.log
+    ## Fix locale
+    for var in LC_ALL= LANG= ; do
+        export "$var"en_US.UTF-8
+    done
+    
+    ##Build image
+    ltsp-build-client --purge-chroot --mount-package-cache --extra-mirror 'http://ppa.launchpad.net/ts.sch.gr/ppa/ubuntu bionic main' --apt-keys '/etc/apt/trusted.gpg.d/ts_sch_gr_ubuntu_ppa.gpg' >/var/log/chroot.build.log
     if [ "$?" -ne 0 ]; then
         echo -n "ERROR ${?}"
         echo ""
@@ -195,6 +203,7 @@ while ! build_chroot; do
     sleep 1
 done
 
+echo -n "done"
 echo ""
 echo "Build succeeded on attempt $BUILD_ATTEMPT"
 
@@ -208,7 +217,7 @@ rm /etc/localtime && ln -s /usr/share/zoneinfo/America/New_York /etc/localtime
 rm ${CHROOT_DIR}/etc/localtime; cp /usr/share/zoneinfo/America/New_York ${CHROOT_DIR}/etc/localtime
 
 echo "--Installing Window Manager & Chromium"
-ltsp-chroot -m --base /opt/ltsp --arch amd64 apt install -y openbox chromium-browser > /dev/null
+ltsp-chroot -m --base /opt/ltsp --arch amd64 apt-get install -qq openbox chromium-browser >/dev/null
 
 echo "--Adding entries to hosts file"
 cat > ${CHROOT_DIR}/etc/init.d/add-hosts <<EOF
@@ -238,8 +247,8 @@ echo ""
 echo -n "--Installing Citrix Workspace in chroot"
 
 cat << EOF | chroot "$CHROOT_DIR"
-dpkg -i icaclientWeb_19.3.0.5_amd64.deb
-if [ "$?" -ne 0 ]; then
+dpkg -i /opt/kiosk/icaclientWeb_19.3.0.5_amd64.deb
+if ! [ "$?" == 0 ]; then
 echo "*** Error installing Citrix Workstation. Please install manually, then update chroot image ***"
 fi
 EOF
@@ -255,7 +264,6 @@ touch /home/kiosk/.ICAClient/.eula_accepted
 
 #do postflight checks before updating image
 ERROR=0
-
 echo ""
 echo "Performing preflight checks before updating image..."
 if ! [ -f "$CHROOT_DIR/usr/bin/openbox" ]; then
