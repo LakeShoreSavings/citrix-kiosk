@@ -15,9 +15,8 @@ if ! [ -x "$(command -v git)" ]; then
   apt-get install -qq git >/dev/null 2>> $ERRLOG
 fi
 
-echo "Setting chroot to ${CHROOT_DIR}"
-
-read -n 1 -s -r -p "Press any key to continue"
+# echo "Setting chroot to ${CHROOT_DIR}"
+# read -n 1 -s -r -p "Press any key to continue"
 
 #Enable serial console in case hosted on KVM 
 HV=$(dmesg | grep "Hypervisor detected" | awk '{print $5}')
@@ -51,7 +50,7 @@ echo "200.50.1.104 influxdb.lakeshoresavings.local influxdb" >> /etc/hosts
 
 #Pull our config files from the Git repo
 echo ""
-echo "Cloning Git Repo..."
+echo -n "Cloning Git Repo..."
 git clone "https://github.com/bdelcamp/kiosk.git" "/opt/kiosk" >/dev/null 2>> "$ERRLOG"
 
 if [ $? -ne 0 ]; then
@@ -65,7 +64,7 @@ echo -n "done"
 
 
 #Create our kiosk user & set defaults
-echo "Create Kiosk user"
+echo "Creating Kiosk user"
 useradd -u 1001 -m kiosk
 echo "kiosk:kiosk" | chpasswd
 
@@ -164,12 +163,24 @@ LDM_PASSWORD=kiosk
 LDM_FATCLIENT=True
 LDM_DIRECTX=True
 LDM_SESSION=openbox
+LDM_LANGUAGE=en_US.UTF-8
+LTSP_FATCLIENT=True
 USE_LOCAL_SWAP=True
 RCFILE_01="/etc/rc2.d/S01add-hosts"
 HOSTNAME_BASE=LSSB
 SOUND=True
 VOLUME=100
 X_BLANKING=False
+LOCALDEV_DENY_CD=True
+LOCALDEV_DENY_FLOPPY=True
+LOCALDEV_DENY_INTERNAL_DISKS=True
+CUPS_SERVER=localhost
+KEEP_SYSTEM_SERVICES=cups
+PRINTER_0_DEVICE="/dev/ttyUSB0"
+PRINTER_0_TYPE=S
+PRINTER_0_SPEED=9600
+
+
 
 EOF
 
@@ -187,7 +198,7 @@ build_chroot () {
     done
     
     ##Build image
-    ltsp-build-client --purge-chroot --mount-package-cache --extra-mirror 'http://ppa.launchpad.net/ts.sch.gr/ppa/ubuntu bionic main' --apt-keys '/etc/apt/trusted.gpg.d/ts_sch_gr_ubuntu_ppa.gpg' >/var/log/chroot.build.log
+    ltsp-build-client --purge-chroot --mount-package-cache --extra-mirror 'http://ppa.launchpad.net/ts.sch.gr/ppa/ubuntu bionic main' --apt-keys '/etc/apt/trusted.gpg.d/ts_sch_gr_ubuntu_ppa.gpg' >/dev/null 2>>/var/log/chroot.build.log
     if [ "$?" -ne 0 ]; then
         echo -n "ERROR ${?}"
         echo ""
@@ -211,13 +222,13 @@ echo "Build succeeded on attempt $BUILD_ATTEMPT"
 
 #Customize chroot image
 echo "" 
-echo -n "Customizing CHROOT"
+echo "Customizing CHROOT:"
 echo "--Setting Timezone"
 rm /etc/localtime && ln -s /usr/share/zoneinfo/America/New_York /etc/localtime
 rm ${CHROOT_DIR}/etc/localtime; cp /usr/share/zoneinfo/America/New_York ${CHROOT_DIR}/etc/localtime
 
 echo "--Installing Window Manager & Chromium"
-ltsp-chroot -m --base /opt/ltsp --arch amd64 apt-get install -qq openbox chromium-browser >/dev/null
+ltsp-chroot -m --base /opt/ltsp --arch amd64 apt-get install -qq openbox chromium-browser >/dev/null 2>&1
 
 echo "--Adding entries to hosts file"
 cat > ${CHROOT_DIR}/etc/init.d/add-hosts <<EOF
@@ -247,8 +258,8 @@ echo ""
 echo -n "--Installing Citrix Workspace in chroot"
 
 cat << EOF | chroot "$CHROOT_DIR"
-dpkg -i /opt/kiosk/icaclientWeb_19.3.0.5_amd64.deb
-if ! [ "$?" == 0 ]; then
+dpkg -i /opt/kiosk/icaclientWeb_19.3.0.5_amd64.deb >/dev/null 2>&1
+if ! [ "$?" == "0" ]; then
 echo "*** Error installing Citrix Workstation. Please install manually, then update chroot image ***"
 fi
 EOF
@@ -297,10 +308,11 @@ ltsp-config dnsmasq
 #Install telegraf
 echo ""
 echo "Installing telegraf..."
-curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+curl -sL https://repos.influxdata.com/influxdb.key | apt-key add - >/dev/null 2>&1
 source /etc/lsb-release
 echo "deb https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stable" | tee /etc/apt/sources.list.d/influxdb.list
-apt update && apt -y -qq install telegraf
+apt-get update >/dev/null 2>&1
+apt-get install -qq telegraf >/dev/null 2>&1
 sleep 5
 sed -i "97i urls = [\"http://influxdb:8086\"]\ndatabase = \"telegraf\" \n" /etc/telegraf/telegraf.conf
 
