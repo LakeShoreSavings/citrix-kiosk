@@ -65,6 +65,9 @@ EOF
 
 
 #install pre-requisite packages
+## For 18.04
+apt install -y software-properties-common
+
 apt install -y --no-install-recommends \
 xdg-utils
 
