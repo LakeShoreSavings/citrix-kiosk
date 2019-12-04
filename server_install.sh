@@ -1,6 +1,8 @@
 CHROOT_DIR=/opt/ltsp/amd64
 MANAGED=/etc/chromium-browser/policies/managed
 RECOMMENDED=/etc/chromium/-browser/policies/recommended
+CTX_USB="http://releases.ubuntu.com/18.04.3/ubuntu-18.04.3-live-server-amd64.iso"
+CTX_WS="https://downloads.citrix.com/16728/icaclient_19.10.0.15_amd64.deb?__gda__=1575482157_5d26b0b7b60424b2a2381c57d18e955d"
 #$CHROME_USER_DATA_DIR
 
 
