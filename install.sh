@@ -47,7 +47,7 @@ fi
 
 #update hosts file
 sed -i "s/127.*/& ${HOSTNAME}/g" /etc/hosts
-echo "200.50.1.104 influxdb.lakeshoresavings.local influxdb" >> /etc/hosts
+echo "172.16.100.149 influxdb.lakeshoresavings.local influxdb" >> /etc/hosts
 
 #Pull our config files from the Git repo
 echo ""
