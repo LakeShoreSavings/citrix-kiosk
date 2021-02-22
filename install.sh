@@ -259,7 +259,7 @@ echo ""
 echo -n "--Installing Citrix Workspace in chroot"
 
 cat << EOF | chroot "$CHROOT_DIR"
-dpkg -i /opt/kiosk/icaclientWeb_19.3.0.5_amd64.deb >/dev/null 2>&1
+dpkg -i /opt/kiosk/icaclientWeb*.deb >/dev/null 2>&1
 if ! [ "$?" == "0" ]; then
 echo "*** Error installing Citrix Workstation. Please install manually, then update chroot image ***"
 fi
