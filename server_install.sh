@@ -148,5 +148,5 @@ ltsp-update-sshkeys && ltsp-update-image
 ltsp-config dnsmasq
 
 #Install telegraf
-wget https://dl.influxdata.com/telegraf/releases/telegraf_1.10.4-1_amd64.deb
-sudo dpkg -i telegraf_1.10.4-1_amd64.deb 
+wget https://dl.influxdata.com/telegraf/releases/telegraf_1.17.3-1_amd64.deb
+sudo dpkg -i telegraf_1.17.3-1_amd64.deb
