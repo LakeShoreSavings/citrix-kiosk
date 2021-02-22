@@ -11,7 +11,8 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 if ! [ -x "$(command -v git)" ]; then
-  echo "Git is not installed, installing... " 
+  echo "Git is not installed, installing... "
+  apt update >/dev/null 2>&1 | tee -a "$ERRLOG"
   apt-get install -qq git >/dev/null 2>> $ERRLOG
 fi
 
@@ -123,7 +124,7 @@ cat /opt/kiosk/menu.xml > /home/kiosk/.config/openbox/menu.xml
 echo "" 
 echo -n "Bringing system packages up to date, this could take a while... "
 
-apt update >/dev/null 2>&1 | tee -a "$ERRLOG"
+
 DEBIAN_FRONTEND=noninteractive apt-get upgrade -qq >/dev/null 2>>"$ERRLOG"
 
 #install pre-requisite packages
