@@ -52,7 +52,7 @@ echo "172.16.100.149 influxdb.lakeshoresavings.local influxdb" >> /etc/hosts
 #Pull our config files from the Git repo
 echo ""
 echo -n "Cloning Git Repo..."
-git clone "https://github.com/bdelcamp/kiosk.git" "/opt/kiosk" >/dev/null 2>> "$ERRLOG"
+git clone "https://github.com/LakeShoreSavings/citrix-kiosk.git" "/opt/kiosk" >/dev/null 2>> "$ERRLOG"
 
 if [ $? -ne 0 ]; then
   read -n 1 -s -r -p "Error cloning repo. Press any key to cleanup and exit"
